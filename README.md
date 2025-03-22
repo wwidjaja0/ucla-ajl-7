@@ -2,7 +2,9 @@
 GitHub repository for the Break Through Tech AI @ UCLA Kaggle competition Spring 2025.
 
 # Team Members
-[William Widjaja](https://github.com/wwidjaja0), [Rita Sargsyan](https://github.com/RitaSargsyan), [Phi Hung Nguyen](https://github.com/AzineZ ), [Mahsa Ileslamlou](https://github.com/mahsailes), [Parnian Kashani](https://github.com/ghapanda), [Eric Lu](https://github.com/ericslu)
+We are a team of 6 from UCLA and UCSD studying Computer Science and Mathematics.
+
+Our team consisted of [William Widjaja](https://github.com/wwidjaja0) who contributed significantly on the data preprocessing stage in collaboration with [Rita Sargsyan](https://github.com/RitaSargsyan). Widjaja further made major contributions during the model training and evaluation phase. [Phi Hung Nguyen](https://github.com/AzineZ ) assisted in creating a baseline model to help the team gauge how our data would perform. [Mahsa Ileslamlou](https://github.com/mahsailes) researched data preprocessing measures to help reduce bias within our model and determined the model we used which had been shown to perform well with dermatology in AI with support of [Parnian Kashani](https://github.com/ghapanda) and [Eric Lu](https://github.com/ericslu).
 
 # Project Overview
 There has been a pattern of dermatology AI tools underperforming for people of different skin colors as a result of the poor diversity of training data. This has played a detementrial effect on marginalized and underserved communities from delayed treatments and other health disparities.
@@ -11,7 +13,12 @@ This project is in collaboration with Break Through Tech, a Cornell Tech initiat
 
 The objective of this competition is to develop a machine learning model that will be equipped to classify 21 skin additions across a diverse skin tone data set. 
 
-By developing a model that is able to accurately identify skin conditions across all skin tones, this project can play a significiant rule in reducing health disparities in dermatology, aim to provide better treatment, and develop more accurate AI healthcare models.
+By developing a model that is able to accurately identify skin conditions across all skin tones, this project can play a significiant role in reducing health disparities in dermatology, aim to provide better treatment for all individuals, and overall contribute to developing more accurate AI healthcare models.
+
+# Project Highlights
+Our project focused on developing a machine learning model with minimal bias using *ResNet152V2* to classify **21** different skin conditions across the diverse set of skin tones provided to us via Kaggle. We implemented techniques such as data augmentation in which we resized and adjusted the brightness and contrast of the images and added custom layers on top of the base model to improve the model's performance. Our major findings indicate that our model was able to begin learning, however, there are necessary adjustments needed to be made to help improve its accuracy. We identified areas of improvement such as implementing more data augmentation techniques and fine-tuning the model more. 
+
+# Setup & Execution
 
 # Data Exploration
 ## Dataset:
@@ -48,4 +55,14 @@ By developing a model that is able to accurately identify skin conditions across
 # Visualizations from Exploratory Data Analysis: 
 <img src="https://drive.google.com/uc?export=view&id=1hbWVETu4vT4PCbxlE0Cb0gWqpIQEKZ98" alt="Image" width="800"/>
 <img src="https://drive.google.com/uc?export=view&id=19tzBmDF0rSRJOKOpB04xNym4-RJkDe2v" alt="Image" width="800"/>
+
+# Model Development
+
+# Results & Key Findings
+
+# Impact Narrative
+We believe that AI is a powerful tool we can use to help improve our healthcare system. We are confident that this project has the capability of reducing errors and biases integrated into our current AI models and can assist our healthcare workers in making quicker and more accurate diagnoses and treatment plans for underserved communities.
+
+# Next Steps & Future Improvements
+We hope to be able to revise our ResNet model by fine-tuning it such as by freezing more layers and adjusting the hyperparameters to see which provide the most optimal conditions for our dataset. We aim to improve its accuracy and ensure an overall better performing model across a diverse dataset of skin tones. We believe that by expanding our dataset to include an even larger area of skin conditions and types, we will be able to better encapsulate key characteristics of a skin condition across all skin tones. 
 
