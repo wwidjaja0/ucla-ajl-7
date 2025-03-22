@@ -46,4 +46,6 @@ By developing a model that is able to accurately identify skin conditions across
   - Sets `class_mode=None` since test labels are not available.
 
 # Visualizations from Exploratory Data Analysis: 
+<img src="https://drive.google.com/uc?export=view&id=1hbWVETu4vT4PCbxlE0Cb0gWqpIQEKZ98" alt="Image" width="800"/>
+<img src="https://drive.google.com/uc?export=view&id=19tzBmDF0rSRJOKOpB04xNym4-RJkDe2v" alt="Image" width="800"/>
 
