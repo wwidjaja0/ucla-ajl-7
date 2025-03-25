@@ -19,6 +19,115 @@ By developing a model that is able to accurately identify skin conditions across
 Our project focused on developing a machine learning model with minimal bias using *ResNet152V2* to classify **21** different skin conditions across the diverse set of skin tones provided to us via Kaggle. We implemented techniques such as data augmentation in which we resized and adjusted the brightness and contrast of the images and added custom layers on top of the base model to improve the model's performance. Our major findings indicate that our model was able to begin learning, however, there are necessary adjustments needed to be made to help improve its accuracy. We identified areas of improvement such as implementing more data augmentation techniques and fine-tuning the model more. 
 
 # Setup & Execution
+## ✅ **Setup & Execution Instructions**
+### 📥 **1. Environment Setup**
+- Recommended: Use **Google Colab** for easy environment management.
+- If running locally, ensure the following packages are installed:
+```bash
+pip install kaggle pandas numpy opencv-python matplotlib seaborn albumentations tensorflow scikit-learn
+```
+
+### 📂 **2. Data Download**
+- Place your `kaggle.json` API key in your working directory.
+- Run the following (already in the notebook) to download and unzip the dataset:
+```python
+! pip install -q kaggle
+! mkdir -p ~/.kaggle
+! cp kaggle.json ~/.kaggle/
+! chmod 600 ~/.kaggle/kaggle.json
+! kaggle competitions download -c bttai-ajl-2025
+! unzip -q bttai-ajl-2025.zip
+```
+This downloads `train.csv`, `test.csv`, and images into your workspace.
+
+### 🔎 **3. Data Preprocessing & Augmentation**
+#### 🔎 **Load `train.csv` and `test.csv` into Pandas DataFrames**
+```python
+import pandas as pd
+
+train_df = pd.read_csv('./train.csv')
+test_df = pd.read_csv('./test.csv')
+
+# Add .jpg extension to reference the image files
+train_df['md5hash'] = train_df['md5hash'].astype(str) + '.jpg'
+test_df['md5hash'] = test_df['md5hash'].astype(str) + '.jpg'
+```
+
+#### 🔗 **Create the `file_path` Column for Image Access**
+This combines the `label` and `md5hash` to create a relative image path:
+```python
+train_df['file_path'] = train_df['label'] + '/' + train_df['md5hash']
+```
+
+#### 🖼 **Apply Albumentations-Based Data Augmentation**
+To increase training data diversity, apply random transformations and save the augmented images:
+```python
+import albumentations as A
+import cv2
+import os
+import numpy as np
+
+transform = A.Compose([
+    A.Resize(128, 128),
+    A.Rotate(limit=20, p=0.5),
+    A.HorizontalFlip(p=0.5),
+    A.RandomBrightnessContrast(p=0.2),
+])
+
+def augment_and_save(image_path, output_path, transform, num_augmentations=3):
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    for i in range(num_augmentations):
+        augmented = transform(image=image)
+        augmented_image = (augmented['image'] * 255).astype(np.uint8)
+        cv2.imwrite(f"{output_path}_aug_{i}.png", cv2.cvtColor(augmented_image, cv2.COLOR_RGB2BGR))
+```
+
+#### 📂 **Run Augmentation Loop**
+Iterate through all images and generate augmented samples:
+```python
+base_dir = './train/train'
+output_base_dir = './train/augmented_train'
+
+for skin_type in os.listdir(base_dir):
+    os.makedirs(os.path.join(output_base_dir, skin_type), exist_ok=True)
+    for image_name in os.listdir(os.path.join(base_dir, skin_type)):
+        image_path = os.path.join(base_dir, skin_type, image_name)
+        output_image_path = os.path.join(output_base_dir, skin_type, image_name.split('.')[0])
+        augment_and_save(image_path, output_image_path, transform)
+```
+
+#### 🎲 **Randomly Select One Augmented Image per Sample**
+For training, randomly pick **one** augmented version for each original image:
+```python
+import random
+
+augmented_base_dir = './train/augmented_train/'
+random_augmented_paths = []
+
+for _, row in train_df.iterrows():
+    label = row['label']
+    base_filename = os.path.splitext(os.path.basename(row['file_path']))[0]
+    aug_dir = os.path.join(augmented_base_dir, label)
+    possible_files = [f for f in os.listdir(aug_dir) if f.startswith(base_filename + '_aug_')]
+    
+    if possible_files:
+        chosen_file = random.choice(possible_files)
+        random_augmented_paths.append(os.path.join(label, chosen_file))
+    else:
+        random_augmented_paths.append(row['file_path'])  # Fallback to original
+
+train_df['random_augmented_file_path'] = random_augmented_paths
+```
+
+#### 🧼 **Normalize Paths (Optional but Recommended)**
+Ensure paths are relative for Keras’ `flow_from_dataframe()`:
+```python
+base_dir = './train/augmented_train/'
+train_df['random_augmented_file_path'] = train_df['random_augmented_file_path'].apply(
+    lambda x: x.replace(base_dir, '') if x.startswith(base_dir) else x
+)
+```
 
 # Data Exploration
 ## Dataset:
@@ -57,6 +166,55 @@ Our project focused on developing a machine learning model with minimal bias usi
 <img src="https://drive.google.com/uc?export=view&id=19tzBmDF0rSRJOKOpB04xNym4-RJkDe2v" alt="Image" width="800"/>
 
 # Model Development
+## 🧠 **Model Training**
+### 🛠 **Prepare Keras Data Generators**
+Finally, create Keras `ImageDataGenerator` objects:
+```python
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+train_datagen = ImageDataGenerator(rescale=1./255)
+train_generator = train_datagen.flow_from_dataframe(
+    dataframe=train_df,
+    directory='./train/augmented_train/',
+    x_col='random_augmented_file_path',
+    y_col='label',
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    validate_filenames=False
+)
+```
+
+- The model uses **ResNet152V2** pretrained on ImageNet with custom dense layers.
+- To start training:
+```python
+history = model.fit(
+    train_generator,
+    validation_data=val_generator,
+    epochs=10,
+    steps_per_epoch=len(train_generator),
+    validation_steps=len(val_generator)
+)
+```
+- After training, the model is saved:
+```python
+model.save("resnet152v2.h5")
+```
+
+### 📈 **Model Evaluation & Prediction**
+- Load the model and make predictions on the test set:
+```python
+model = load_model("./resnet152v2.h5")
+test_generator = preprocess_test_data(test_df, test_dir)
+predictions = model.predict(test_generator)
+```
+- Convert predictions to labels and save:
+```python
+submission.to_csv("submission.csv", index=False)
+```
+
+### 🗂 **Output**
+- Final predictions are saved in **`submission.csv`** with class labels ready for competition submission.
 
 # Results & Key Findings
 
