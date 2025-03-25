@@ -217,6 +217,32 @@ submission.to_csv("submission.csv", index=False)
 - Final predictions are saved in **`submission.csv`** with class labels ready for competition submission.
 
 # Results & Key Findings
+## 📊 **1. Dataset Imbalance Observed**
+- The dataset shows **class imbalance** across skin condition labels, particularly when broken down by the **Fitzpatrick skin scale**.
+- Certain conditions (e.g., *prurigo-nodularis*) are **overrepresented**, while others have **limited samples**, making balancing important.
+- Fitzpatrick types I-III dominate the dataset, suggesting fewer examples for very dark (IV-VI) skin tones.
+
+## 🔄 **2. Need for Data Augmentation**
+- Augmentation is crucial to synthetically expand minority classes and prevent overfitting.
+- Applying **random rotations, brightness/contrast adjustments, and horizontal flips** can increase data variety and model robustness.
+- This step can help balance rare classes and diverse skin tones in the training data.
+
+## 🧠 **3. Model Performance vs. Complexity**
+- Initial model choice, **ResNet152V2**, provided good feature extraction power but was heavy and slow to train.
+- Future iterations could explore **MobileNetV2** or **EfficientNetB0** for similar accuracy with faster training time and less resource usage.
+
+## 📈 **4. Successful End-to-End Pipeline Execution**
+- The team successfully:
+  - Loaded and preprocessed the data
+  - Augmented training images dynamically
+  - Set up a Keras data generator pipeline
+  - Trained a ResNet152V2-based CNN model
+  - Generated predictions and prepared a valid submission file
+
+## 🔍 **5. Recommendations for Improvement**
+- Consider **stratified sampling** when splitting train/validation sets to preserve class distribution.
+- Investigate **fine-tuning** the model by unfreezing top ResNet layers after initial training for better accuracy.
+- Incorporate **Fitzpatrick scale-based stratification** or balancing strategies for fairer performance across skin tones.
 
 # Impact Narrative
 We believe that AI is a powerful tool we can use to help improve our healthcare system. We are confident that this project has the capability of reducing errors and biases integrated into our current AI models and can assist our healthcare workers in making quicker and more accurate diagnoses and treatment plans for underserved communities.
